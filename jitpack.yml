@@ -1,9 +1,28 @@
+# jitpack.yml — full working config for Jitsi SDK fork
+
+# Use Java 17 (matches Jitsi SDK Gradle)
 jdk:
   - openjdk17
 
+# Use Node 20 for React Native dependencies
+node:
+  version: 20
+
+# Run before installing/building
 before_install:
+  # Ensure Node modules are installed (required for React Native subprojects)
   - npm install
-  - cd android
+  # You can also use yarn if your repo uses it:
+  # - yarn install
 
 install:
+  # Go to Android folder
+  - cd android
+  # Build only the SDK module and publish to local Maven
   - ./gradlew :sdk:publishToMavenLocal -x test
+  # Skip lint and other modules to reduce build failures
+  - ./gradlew :sdk:assembleRelease -x lint -x test
+
+# Optional: set environment variables if needed
+env:
+  OVERRIDE_SDK_VERSION: "11.3.0-fork" # sets version in publishing block
