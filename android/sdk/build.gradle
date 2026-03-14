@@ -1,10 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
-plugins {
-    id 'com.android.library'
-    id 'maven-publish'
-}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     ndkVersion rootProject.ext.ndkVersion
@@ -276,7 +273,7 @@ android.libraryVariants.all { def variant ->
 publishing {
     publications {
         aarArchive(MavenPublication) {
-            groupId 'org.jitsi.react'
+            groupId 'com.github.Ahmad-Mustafaa'
             artifactId 'jitsi-meet-sdk'
             version System.env.OVERRIDE_SDK_VERSION ?: project.sdkVersion
 
@@ -322,16 +319,4 @@ publishing {
         }
     }
 }
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'com.github.Ahmad-Mustafaa'
-            artifactId = 'jitsi-meet-android-audio-phone'
-            version = '1.0'
 
-            afterEvaluate {
-                from components.release
-            }
-        }
-    }
-}
