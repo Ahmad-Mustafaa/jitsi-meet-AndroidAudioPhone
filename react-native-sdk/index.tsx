@@ -11,7 +11,7 @@ import React, {
     useRef,
     useState
 } from 'react';
-import { View, ViewStyle } from 'react-native';
+import { NativeModules, Platform, View, ViewStyle } from 'react-native';
 
 import type { IRoomsInfo } from '../react/features/breakout-rooms/types';
 
@@ -21,6 +21,8 @@ import { setAudioOnly } from './react/features/base/audio-only/actions';
 import { setAudioMuted, setVideoMuted } from './react/features/base/media/actions';
 import { getRoomsInfo } from './react/features/breakout-rooms/functions';
 
+// Native module for earpiece audio routing on Android.
+const { AudioModeModule } = NativeModules;
 
 interface IEventListeners {
     onAudioMutedChanged?: Function;
@@ -60,6 +62,26 @@ export interface JitsiRefProps {
     setAudioMuted?: (muted: boolean) => void;
     setVideoMuted?: (muted: boolean) => void;
     getRoomsInfo?: () => IRoomsInfo;
+    setAudioToEarpiece?: () => void;
+}
+
+/**
+ * Routes audio to the earpiece (or wired/Bluetooth headset when connected)
+ * and disables the speakerphone on Android. On other platforms this is a no-op.
+ */
+function setAudioToEarpiece() {
+    if (Platform.OS === 'android') {
+        if (!AudioModeModule) {
+            console.warn('AudioModeModule is not available; earpiece routing skipped.');
+            return;
+        }
+
+        try {
+            AudioModeModule.setAudioToEarpiece();
+        } catch (err) {
+            console.warn('AudioModeModule.setAudioToEarpiece() failed:', err);
+        }
+    }
 }
 
 /**
@@ -105,7 +127,8 @@ export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) =>
             const state = app.current.state.store.getState();
 
             return getRoomsInfo(state);
-        }
+        },
+        setAudioToEarpiece
     }));
 
     useEffect(
@@ -130,6 +153,14 @@ export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) =>
                 };
             }
 
+            // Wrap the caller-supplied onConferenceJoined handler so that
+            // audio is automatically routed to the earpiece on Android as soon
+            // as the conference is established.
+            const handleConferenceJoined = () => {
+                setAudioToEarpiece();
+                eventListeners?.onConferenceJoined?.();
+            };
+
             setAppProps({
                 'flags': flags,
                 'rnSdkHandlers': {
@@ -137,7 +168,7 @@ export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) =>
                     onVideoMutedChanged: eventListeners?.onVideoMutedChanged,
                     onConferenceBlurred: eventListeners?.onConferenceBlurred,
                     onConferenceFocused: eventListeners?.onConferenceFocused,
-                    onConferenceJoined: eventListeners?.onConferenceJoined,
+                    onConferenceJoined: handleConferenceJoined,
                     onConferenceWillJoin: eventListeners?.onConferenceWillJoin,
                     onConferenceLeft: eventListeners?.onConferenceLeft,
                     onEnterPictureInPicture: eventListeners?.onEnterPictureInPicture,

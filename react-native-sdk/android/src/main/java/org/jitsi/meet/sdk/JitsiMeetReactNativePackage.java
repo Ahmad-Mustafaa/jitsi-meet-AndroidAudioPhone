@@ -6,6 +6,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
+import com.jitsi.audiomode.AudioModeModule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ public class JitsiMeetReactNativePackage implements ReactPackage {
             = new ArrayList<>(Arrays.<NativeModule>asList(
                 new AndroidSettingsModule(reactContext),
                 new AppInfoModule(reactContext),
+                new org.jitsi.meet.sdk.AudioModeModule(reactContext),
                 new AudioModeModule(reactContext),
                 new JMOngoingConferenceModule(reactContext),
                 new JavaScriptSandboxModule(reactContext),
