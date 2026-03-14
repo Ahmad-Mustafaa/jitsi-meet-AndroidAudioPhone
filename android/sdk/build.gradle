@@ -1,6 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     ndkVersion rootProject.ext.ndkVersion
@@ -314,6 +318,19 @@ publishing {
                     username rootProject.ext.mavenUser
                     password rootProject.ext.mavenPassword
                 }
+            }
+        }
+    }
+}
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'com.github.Ahmad-Mustafaa'
+            artifactId = 'jitsi-meet-android-audio-phone'
+            version = '1.0'
+
+            afterEvaluate {
+                from components.release
             }
         }
     }
