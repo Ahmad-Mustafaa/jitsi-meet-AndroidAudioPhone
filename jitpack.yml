@@ -2,6 +2,7 @@ jdk:
   - openjdk17
 
 before_install:
+  - npm install
   - cd android
 
 install:
